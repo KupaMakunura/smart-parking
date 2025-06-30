@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: ./api
+    container_name: smart-parking-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api/ai_models:/app/ai_models
+      - ./api/parking_db.json:/app/parking_db.json
+      - ./api/parking_db_algorithm.json:/app/parking_db_algorithm.json
+      - ./api/parking_db_sequential.json:/app/parking_db_sequential.json
+      - ./api/parking_db_random.json:/app/parking_db_random.json
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./web
+    container_name: smart-parking-web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    restart: unless-stopped
