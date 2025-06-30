@@ -23,12 +23,15 @@ export interface ParkingData {
   lastUpdated?: Date;
 }
 
+export type AllocationStrategy = "algorithm" | "sequential" | "random";
+
 export interface VehicleEntry {
   licensePlate: string;
   vehicleType: VehicleType;
   arrivalTime: string;
   expectedDeparture: string;
   stayDuration: number;
+  allocationStrategy?: AllocationStrategy; // Optional, for strategy selection
 }
 
 // API types
