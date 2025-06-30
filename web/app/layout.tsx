@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Smart Parking',
-  description: 'A smart parking system that uses AI to allocate parking spots efficiently.',
+  title: 'smart-parking',
+  description: 'Smart parking app and parking allocation system',
  
 }
 
