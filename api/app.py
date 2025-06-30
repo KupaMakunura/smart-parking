@@ -1,12 +1,12 @@
 import json
 import os
 import pickle
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Any, Dict, List, Optional
 import time
 
 import numpy as np
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 
 # Custom modules
@@ -205,19 +205,23 @@ async def get_parking_status():
 
 # Allocate parking slot
 @app.post("/api/parking/allocate", response_model=ParkingAllocation)
-async def allocate_parking(vehicle_data: VehicleData):
+async def allocate_parking(
+    vehicle_data: VehicleData,
+    strategy: Optional[str] = Query(
+        None, description="Allocation strategy: algorithm, sequential, random"
+    ),
+):
     if not smart_parking:
         raise HTTPException(
             status_code=500, detail="Smart parking system not initialized"
         )
 
-    # First, get current parking status
-    parking_status = await get_parking_status()
-
-    # Check if parking is full
-    if parking_status.available_slots == 0:
+    # Use strategy from query or default to 'algorithm'
+    selected_strategy = (strategy or "algorithm").lower()
+    if selected_strategy not in ["algorithm", "sequential", "random"]:
         raise HTTPException(
-            status_code=400, detail="Parking is full, no slots available"
+            status_code=400,
+            detail="Invalid strategy. Must be 'algorithm', 'sequential', or 'random'",
         )
 
     # Prepare data for the model
@@ -229,42 +233,61 @@ async def allocate_parking(vehicle_data: VehicleData):
         "departure_time": vehicle_data.departure_time,
         "priority_level": vehicle_data.priority_level,
     }
-
-    # Calculate stay duration
     arrival_time = parse_datetime(vehicle_data.arrival_time)
     departure_time = parse_datetime(vehicle_data.departure_time)
     duration_hours = (departure_time - arrival_time).total_seconds() / 3600
-
-    # Add calculated fields
     vehicle_input["duration_hours"] = duration_hours
     vehicle_input["day_of_week"] = arrival_time.weekday()
     vehicle_input["hour_of_day"] = arrival_time.hour
 
-    # Allocate parking using the smart parking system
-    allocation = smart_parking.allocate_parking(vehicle_input)
-
-    if allocation["status"] != "Allocated":
-        raise HTTPException(status_code=400, detail=allocation["status"])
-
-    # Create allocation record for database
-    allocation_record = {
-        "vehicle_plate_num": vehicle_data.vehicle_plate_num,
-        "vehicle_plate_type": vehicle_data.vehicle_plate_type,
-        "vehicle_type": vehicle_data.vehicle_type,
-        "bay_assigned": int(allocation["bay_assigned"]),
-        "slot_assigned": int(allocation["slot_assigned"]),
-        "allocation_score": float(allocation["allocation_score"]),
-        "allocation_time": allocation["allocation_time"],
-        "departure_time": vehicle_data.departure_time,
-        "priority_level": vehicle_data.priority_level,
-        "is_active": True,
-    }
-
-    # Save to database
-    allocation_id = db.create_allocation(allocation_record)
-    allocation_record["id"] = allocation_id
-
-    return ParkingAllocation(**allocation_record)
+    if selected_strategy == "algorithm":
+        # Use the smart parking system's default allocation
+        allocation = smart_parking.allocate_parking(vehicle_input)
+        if allocation["status"] != "Allocated":
+            raise HTTPException(status_code=400, detail=allocation["status"])
+        allocation_record = {
+            "vehicle_plate_num": vehicle_data.vehicle_plate_num,
+            "vehicle_plate_type": vehicle_data.vehicle_plate_type,
+            "vehicle_type": vehicle_data.vehicle_type,
+            "bay_assigned": int(allocation["bay_assigned"]),
+            "slot_assigned": int(allocation["slot_assigned"]),
+            "allocation_score": float(allocation["allocation_score"]),
+            "allocation_time": allocation["allocation_time"],
+            "departure_time": vehicle_data.departure_time,
+            "priority_level": vehicle_data.priority_level,
+            "is_active": True,
+        }
+        allocation_id = db.create_allocation(allocation_record)
+        allocation_record["id"] = allocation_id
+        return ParkingAllocation(**allocation_record)
+    else:
+        # Use simulation manager for sequential/random
+        simulation_manager = SimulationManager(smart_parking)
+        vehicles_list = [vehicle_input]
+        sim_results = simulation_manager.run_simulation(
+            vehicles_list, selected_strategy
+        )
+        alloc_result = sim_results["allocation_results"][0]
+        if alloc_result["status"] != "success":
+            raise HTTPException(
+                status_code=400,
+                detail=alloc_result.get("error_message") or "Allocation failed.",
+            )
+        allocation_record = {
+            "vehicle_plate_num": vehicle_data.vehicle_plate_num,
+            "vehicle_plate_type": vehicle_data.vehicle_plate_type,
+            "vehicle_type": vehicle_data.vehicle_type,
+            "bay_assigned": int(alloc_result["bay_assigned"]),
+            "slot_assigned": int(alloc_result["slot_assigned"]),
+            "allocation_score": float(alloc_result["allocation_score"]),
+            "allocation_time": alloc_result["allocation_time"],
+            "departure_time": vehicle_data.departure_time,
+            "priority_level": vehicle_data.priority_level,
+            "is_active": True,
+        }
+        allocation_id = db.create_allocation(allocation_record)
+        allocation_record["id"] = allocation_id
+        return ParkingAllocation(**allocation_record)
 
 
 # Get allocation by ID
