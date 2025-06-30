@@ -9,7 +9,7 @@ COPY package.json ./
 
 
 # Install dependencies
-RUN npm install -g npm && npm install
+RUN npm install -g npm && npm install --force
 
 # Copy the rest of the app
 COPY . .

@@ -15,12 +15,14 @@ RUN apk add --no-cache \
     linux-headers \
     g++ \
     libffi-dev \
-    openssl-dev
+    openssl-dev \
+    python3-dev \
+    py3-setuptools \
+    py3-wheel \
+    make
 
-# Copy requirements file
-COPY requirements.txt .
-
-# Install Python dependencies
+# Upgrade pip, setuptools, and wheel before installing requirements
+RUN pip install --upgrade pip setuptools wheel
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files

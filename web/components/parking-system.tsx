@@ -1,19 +1,20 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { BarChart3, Car, History, LayoutDashboard, Settings, Brain, TrendingUp } from "lucide-react"
-import ParkingVisualization from "./parking-visualization"
-import VehicleEntryForm from "./vehicle-entry-form"
-import ParkingStats from "./parking-stats"
-import VehicleHistory from "./vehicle-history"
-import { ParkingProvider } from "@/context/parking-context"
-import AlgorithmSettings from "./algorithm-settings"
-import AlgorithmComparison from "./algorithm-comparison"
-import { AlgorithmProvider, useAlgorithmContext } from "@/context/algorithm-context"
+import {
+  AlgorithmProvider,
+  useAlgorithmContext,
+} from "@/context/algorithm-context";
+import { ParkingProvider } from "@/context/parking-context";
+import { BarChart3, Brain, Car, LayoutDashboard, Settings } from "lucide-react";
+import { useState } from "react";
+import AlgorithmSettings from "./algorithm-settings";
+import ParkingStats from "./parking-stats";
+import ParkingVisualization from "./parking-visualization";
+import VehicleEntryForm from "./vehicle-entry-form";
 
 // Create a new inner component that uses the algorithm context
 function ParkingSystemContent() {
-  const [activeView, setActiveView] = useState("dashboard")
+  const [activeView, setActiveView] = useState("dashboard");
   const {
     isComparisonMode,
     setIsComparisonMode,
@@ -23,12 +24,12 @@ function ParkingSystemContent() {
     comparisonData,
     refreshComparisonData,
     isLoading,
-  } = useAlgorithmContext()
+  } = useAlgorithmContext();
 
   const handleStartComparison = () => {
-    setIsComparisonMode(true)
-    setActiveView("comparison")
-  }
+    setIsComparisonMode(true);
+    setActiveView("comparison");
+  };
 
   return (
     <div className="w-full max-w-7xl mx-auto">
@@ -37,8 +38,12 @@ function ParkingSystemContent() {
         <div className="w-64 bg-white border-r shadow-sm">
           <div className="p-4 border-b">
             <h1 className="text-xl font-bold">Smart Parking</h1>
-            <p className="text-xs text-muted-foreground">AI-powered management</p>
-            {isLoading && <div className="text-xs text-blue-600 mt-1">Syncing with server...</div>}
+
+            {isLoading && (
+              <div className="text-xs text-blue-600 mt-1">
+                Syncing with server...
+              </div>
+            )}
           </div>
 
           <div className="p-2">
@@ -58,7 +63,9 @@ function ParkingSystemContent() {
               <button
                 onClick={() => setActiveView("entry")}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md ${
-                  activeView === "entry" ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700 hover:bg-gray-100"
+                  activeView === "entry"
+                    ? "bg-blue-50 text-blue-700 font-medium"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 <Car className="h-4 w-4" />
@@ -68,22 +75,26 @@ function ParkingSystemContent() {
               <button
                 onClick={() => setActiveView("stats")}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md ${
-                  activeView === "stats" ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700 hover:bg-gray-100"
+                  activeView === "stats"
+                    ? "bg-blue-50 text-blue-700 font-medium"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 <BarChart3 className="h-4 w-4" />
                 <span>Parking Statistics</span>
               </button>
 
-              <button
+              {/* <button
                 onClick={() => setActiveView("history")}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md ${
-                  activeView === "history" ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700 hover:bg-gray-100"
+                  activeView === "history"
+                    ? "bg-blue-50 text-blue-700 font-medium"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 <History className="h-4 w-4" />
                 <span>Vehicle History</span>
-              </button>
+              </button> */}
 
               <button
                 onClick={() => setActiveView("algorithms")}
@@ -95,19 +106,6 @@ function ParkingSystemContent() {
               >
                 <Brain className="h-4 w-4" />
                 <span>Algorithm Settings</span>
-              </button>
-
-              <button
-                onClick={() => setActiveView("comparison")}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md ${
-                  activeView === "comparison"
-                    ? "bg-blue-50 text-blue-700 font-medium"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                <TrendingUp className="h-4 w-4" />
-                <span>Algorithm Comparison</span>
-                {isComparisonMode && <div className="w-2 h-2 bg-green-500 rounded-full ml-auto"></div>}
               </button>
             </nav>
 
@@ -126,8 +124,12 @@ function ParkingSystemContent() {
         <div className="flex-1 overflow-auto">
           <div className="p-6">
             <div className="mb-8 text-center">
-              <h1 className="text-3xl font-bold tracking-tight">Smart Parking Management System</h1>
-              <p className="text-muted-foreground mt-2">AI-powered multi-story parking allocation</p>
+              <h1 className="text-3xl font-bold tracking-tight">
+                Smart Parking Management System
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                AI-powered multi-story parking allocation
+              </p>
             </div>
 
             <ParkingProvider>
@@ -139,7 +141,9 @@ function ParkingSystemContent() {
 
               {activeView === "entry" && (
                 <div className="bg-white rounded-lg shadow-lg p-6">
-                  <VehicleEntryForm onComplete={() => setActiveView("dashboard")} />
+                  <VehicleEntryForm
+                    onComplete={() => setActiveView("dashboard")}
+                  />
                 </div>
               )}
 
@@ -149,11 +153,11 @@ function ParkingSystemContent() {
                 </div>
               )}
 
-              {activeView === "history" && (
+              {/* {activeView === "history" && (
                 <div className="bg-white rounded-lg shadow-lg p-6">
                   <VehicleHistory />
                 </div>
-              )}
+              )} */}
 
               {activeView === "algorithms" && (
                 <div className="bg-white rounded-lg shadow-lg p-6">
@@ -166,24 +170,12 @@ function ParkingSystemContent() {
                   />
                 </div>
               )}
-
-              {activeView === "comparison" && (
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <AlgorithmComparison
-                    comparisonData={comparisonData}
-                    isActive={isComparisonMode}
-                    onReset={resetComparison}
-                    onRefresh={refreshComparisonData}
-                    isLoading={isLoading}
-                  />
-                </div>
-              )}
             </ParkingProvider>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Update the main component to wrap with AlgorithmProvider
@@ -192,5 +184,5 @@ export default function ParkingSystem() {
     <AlgorithmProvider>
       <ParkingSystemContent />
     </AlgorithmProvider>
-  )
+  );
 }

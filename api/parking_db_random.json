@@ -1,1 +1,1 @@
-{ "allocations": {} }
+{"allocations": {"1": {"vehicle_plate_num": "SAMPLE001", "vehicle_plate_type": 0, "vehicle_type": 0, "bay_assigned": 3, "slot_assigned": 4, "allocation_score": 55.33373840253854, "allocation_time": "2025-06-30T12:23:12.789983", "departure_time": "2025-06-30T12:23:12.723Z", "priority_level": 1, "is_active": true}}}

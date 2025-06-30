@@ -71,14 +71,20 @@ db_algorithm = ParkingDatabase(
 def parse_datetime(dt_str):
     if dt_str is None:
         return None
-    # Check if the string is offset-aware (has a Z or timezone)
     if isinstance(dt_str, str):
         if "Z" in dt_str or "+" in dt_str:
-            # Make offset-aware datetime
             return datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
-        else:
-            # Make naive datetime
+        try:
+            # Try full datetime first
             return datetime.fromisoformat(dt_str)
+        except ValueError:
+            # Handle time-only string (e.g., '12:16')
+            try:
+                today = date(2025, 6, 30)  # Use current date
+                t = datetime.strptime(dt_str, "%H:%M").time()
+                return datetime.combine(today, t)
+            except Exception:
+                raise ValueError(f"Invalid datetime or time format: {dt_str}")
     return dt_str  # Already a datetime object
 
 
