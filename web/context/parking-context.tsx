@@ -46,14 +46,16 @@ export function ParkingProvider({ children }: { children: ReactNode }) {
     useState<AllocationStrategy>("algorithm");
 
   // Fetch parking status from the API
-  const fetchParkingStatus = async () => {
+  const fetchParkingStatus = async (strategy?: AllocationStrategy) => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/parking/status");
+      const usedStrategy = strategy || allocationStrategy || "algorithm";
+      const response = await fetch(
+        `http://localhost:8000/api/parking/status/${usedStrategy}`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch parking status");
       }
-
       const data = await response.json();
 
       // Transform the API data to match our frontend model
@@ -130,10 +132,10 @@ export function ParkingProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Fetch parking status on component mount
+  // Fetch parking status on component mount and when allocationStrategy changes
   useEffect(() => {
-    fetchParkingStatus();
-  }, []);
+    fetchParkingStatus(allocationStrategy);
+  }, [allocationStrategy]);
 
   // Allocate parking using the API
   const allocateParking = async (entry: VehicleEntry) => {

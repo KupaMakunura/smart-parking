@@ -22,9 +22,24 @@ import {
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { AllocationStrategy } from "@/types/parking";
 
 export default function ParkingStats() {
-  const { parkingData, fetchParkingStatus, isLoading } = useParkingContext();
+  const {
+    parkingData,
+    fetchParkingStatus,
+    isLoading,
+    allocationStrategy,
+    setAllocationStrategy,
+  } = useParkingContext();
+
+  // Add strategy options
+  const strategyOptions = [
+    { label: "AI Algorithm", value: "algorithm" },
+    { label: "Sequential", value: "sequential" },
+    { label: "Random", value: "random" },
+  ];
 
   // Use API-provided total counts if available, otherwise calculate
   const totalSpots = parkingData.totalSlots || parkingData.spots.length;
@@ -82,6 +97,10 @@ export default function ParkingStats() {
     await fetchParkingStatus();
   };
 
+  const handleStrategyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setAllocationStrategy(e.target.value as AllocationStrategy);
+  };
+
   const formatLastUpdated = () => {
     if (!parkingData.lastUpdated) return "";
     return new Date(parkingData.lastUpdated).toLocaleString([], {
@@ -103,17 +122,31 @@ export default function ParkingStats() {
             </p>
           )}
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRefresh}
-          disabled={isLoading}
-        >
-          <RefreshCw
-            className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
-          />
-          Refresh Data
-        </Button>
+        <div className="flex items-center gap-2">
+          <select
+            className="border rounded px-2 py-1 text-sm"
+            value={allocationStrategy}
+            onChange={handleStrategyChange}
+            disabled={isLoading}
+          >
+            {strategyOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchParkingStatus()}
+            disabled={isLoading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+            />
+            Refresh Data
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
