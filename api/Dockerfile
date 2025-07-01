@@ -1,5 +1,4 @@
-# Use Python 3.12 Alpine as base image
-FROM python:3.12-alpine
+FROM python:3.12-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -8,18 +7,18 @@ ENV PYTHONUNBUFFERED=1
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apk add --no-cache \
+# Install system dependencies (using apt for Debian-based image)
+RUN apt-get update && apt-get install -y \
     gcc \
-    musl-dev \
-    linux-headers \
     g++ \
+    make \
     libffi-dev \
-    openssl-dev \
+    libssl-dev \
     python3-dev \
-    py3-setuptools \
-    py3-wheel \
-    make
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first to leverage Docker cache
+COPY requirements.txt .
 
 # Upgrade pip, setuptools, and wheel before installing requirements
 RUN pip install --upgrade pip setuptools wheel
@@ -35,4 +34,4 @@ RUN mkdir -p ai_models
 EXPOSE 8000
 
 # Command to run the application
-CMD ["fastapi", "run", "app.py", "--host", "0.0.0.0", "--port", "8000",]
+CMD ["fastapi", "run", "app.py", "--host", "0.0.0.0", "--port", "8000"]
