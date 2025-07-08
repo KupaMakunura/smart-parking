@@ -36,9 +36,6 @@ export default function ParkingVisualization() {
     "government" | "private" | "public"
   >("private");
   const [processingImage, setProcessingImage] = useState<boolean>(false);
-  const [comparisonResults, setComparisonResults] = useState<any>(null);
-  const [isComparing, setIsComparing] = useState(false);
-
   const entryInputRef = useRef<HTMLInputElement>(null);
   const exitInputRef = useRef<HTMLInputElement>(null);
   const controlsRef = useRef(null);
@@ -220,42 +217,6 @@ export default function ParkingVisualization() {
     }
   };
 
-  // Simple compare all strategies handler
-  const handleCompareStrategies = async () => {
-    setIsComparing(true);
-    setComparisonResults(null);
-    try {
-      // Use all current allocations as the dataset for comparison
-      const response = await fetch(
-        "http://localhost:8000/api/parking/allocations?active_only=true"
-      );
-      const allocations = await response.json();
-      // Prepare vehicles array for API
-      const vehicles = allocations.map((a: any) => ({
-        vehicle_plate_num: a.vehicle_plate_num,
-        vehicle_plate_type: a.vehicle_plate_type,
-        vehicle_type: a.vehicle_type,
-        arrival_time: a.allocation_time,
-        departure_time: a.departure_time,
-        priority_level: a.priority_level,
-      }));
-      const compareRes = await fetch(
-        "http://localhost:8000/api/parking/compare",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(vehicles),
-        }
-      );
-      const data = await compareRes.json();
-      setComparisonResults(data);
-    } catch (error) {
-      setComparisonResults({ error: "Comparison failed." });
-    } finally {
-      setIsComparing(false);
-    }
-  };
-
   // Add state for strategy selection UI
   const strategyOptions: { label: string; value: AllocationStrategy }[] = [
     { label: "AI Algorithm", value: "algorithm" },
@@ -310,7 +271,7 @@ export default function ParkingVisualization() {
             <span className="sr-only">Refresh</span>
           </Button>
         </div>
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Button
             onClick={() => entryInputRef.current?.click()}
             className="w-full bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
@@ -352,7 +313,7 @@ export default function ParkingVisualization() {
             accept="image/*"
             onChange={handleExitImageUpload}
           />
-        </div>
+        </div> */}
       </div>
 
       <Canvas camera={{ position: [15, 15, 15], fov: 50 }}>
@@ -599,50 +560,7 @@ export default function ParkingVisualization() {
         </DialogContent>
       </Dialog>
 
-      {/* Comparison UI */}
-      <div className="absolute bottom-4 right-4 z-10 bg-white/90 p-3 rounded-lg shadow-md">
-        <Button
-          onClick={handleCompareStrategies}
-          disabled={isComparing}
-          className="mb-2 w-full"
-        >
-          {isComparing ? "Comparing..." : "Compare All Strategies"}
-        </Button>
-        {comparisonResults && !comparisonResults.error && (
-          <div className="space-y-2">
-            {Object.entries(comparisonResults).map(
-              ([strategy, result]: any) => (
-                <Card key={strategy} className="bg-gray-50">
-                  <CardHeader>
-                    <CardTitle className="text-sm">
-                      {strategy.charAt(0).toUpperCase() + strategy.slice(1)}{" "}
-                      Strategy
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-xs">
-                      Success Rate:{" "}
-                      {result.success_rate
-                        ? (result.success_rate * 100).toFixed(1)
-                        : "-"}
-                      %
-                    </div>
-                    <div className="text-xs">
-                      Avg Score: {result.average_allocation_score ?? "-"}
-                    </div>
-                    <div className="text-xs">
-                      Processing Time: {result.total_processing_time ?? "-"}s
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            )}
-          </div>
-        )}
-        {comparisonResults && comparisonResults.error && (
-          <div className="text-xs text-red-500">{comparisonResults.error}</div>
-        )}
-      </div>
+
     </div>
   );
 }
