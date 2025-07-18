@@ -11,6 +11,7 @@ import type {
   ParkingData,
   VehicleEntry,
   AllocationStrategy,
+  ComparisonResults,
 } from "@/types/parking";
 
 // Initial empty parking data structure
@@ -25,6 +26,9 @@ const emptyParkingData: ParkingData = {
 
 interface ParkingContextType {
   parkingData: ParkingData;
+  comparisonResults: ComparisonResults | null;
+  isLoadingComparison: boolean;
+  compareStrategies: (vehicles: VehicleEntry[]) => Promise<void>;
   allocateParking: (entry: VehicleEntry) => Promise<{
     success: boolean;
     floor?: number;
@@ -39,11 +43,20 @@ interface ParkingContextType {
 
 const ParkingContext = createContext<ParkingContextType | undefined>(undefined);
 
+const emptyComparisonResults: ComparisonResults = {
+  algorithm: null,
+  random: null,
+  sequential: null,
+};
+
 export function ParkingProvider({ children }: { children: ReactNode }) {
   const [parkingData, setParkingData] = useState<ParkingData>(emptyParkingData);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [allocationStrategy, setAllocationStrategy] =
     useState<AllocationStrategy>("algorithm");
+  const [comparisonResults, setComparisonResults] =
+    useState<ComparisonResults | null>(null);
+  const [isLoadingComparison, setIsLoadingComparison] = useState<boolean>(false);
 
   // Fetch parking status from the API
   const fetchParkingStatus = async (strategy?: AllocationStrategy) => {
@@ -209,6 +222,34 @@ export function ParkingProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const compareStrategies = async (vehicles: VehicleEntry[]) => {
+    setIsLoadingComparison(true);
+    try {
+      const response = await fetch(
+        "http://localhost:8000/api/parking/compare",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(vehicles),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to compare strategies");
+      }
+
+      const data = await response.json();
+      setComparisonResults(data);
+    } catch (error) {
+      console.error("Error comparing strategies:", error);
+      setComparisonResults(emptyComparisonResults);
+    } finally {
+      setIsLoadingComparison(false);
+    }
+  };
+
   return (
     <ParkingContext.Provider
       value={{
@@ -218,6 +259,9 @@ export function ParkingProvider({ children }: { children: ReactNode }) {
         isLoading,
         allocationStrategy,
         setAllocationStrategy,
+        comparisonResults,
+        isLoadingComparison,
+        compareStrategies,
       }}
     >
       {children}

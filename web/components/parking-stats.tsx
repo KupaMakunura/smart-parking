@@ -8,18 +8,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
   BarChart,
   Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { useState } from "react";
@@ -30,9 +35,26 @@ export default function ParkingStats() {
     parkingData,
     fetchParkingStatus,
     isLoading,
+    comparisonResults,
+    isLoadingComparison,
     allocationStrategy,
     setAllocationStrategy,
   } = useParkingContext();
+
+  const chartData = comparisonResults
+    ? Object.entries(comparisonResults)
+        .filter(([, result]) => result)
+        .map(([strategy, result]) => ({
+          name: strategy,
+          "Success Rate": result!.success_rate,
+          "Avg. Allocation Score": result!.average_allocation_score,
+          "Processing Time (ms)": result!.total_processing_time * 1000,
+        }))
+    : [];
+
+  if (isLoading) {
+    return <div>Loading stats...</div>;
+  }
 
   // Add strategy options
   const strategyOptions = [
@@ -221,7 +243,7 @@ export default function ParkingStats() {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
-                        label={({ name, percent }) =>
+                        label={({ name, percent }: { name: string; percent: number }) =>
                           `${name}: ${(percent * 100).toFixed(0)}%`
                         }
                       >
@@ -248,7 +270,7 @@ export default function ParkingStats() {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
-                        label={({ name, percent }) =>
+                        label={({ name, percent }: { name: string; percent: number }) =>
                           `${name}: ${(percent * 100).toFixed(0)}%`
                         }
                       >
@@ -315,6 +337,67 @@ export default function ParkingStats() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {isLoadingComparison && <div>Loading comparison results...</div>}
+
+      {comparisonResults && (
+        <div className="mt-8">
+          <h3 className="text-2xl font-bold mb-4">Strategy Comparison</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Success Rate (%)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="Success Rate" stroke="#8884d8" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Average Allocation Score</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="Avg. Allocation Score" stroke="#82ca9d" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Processing Time (ms)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="Processing Time (ms)" stroke="#ffc658" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -25,6 +25,35 @@ export interface ParkingData {
 
 export type AllocationStrategy = "algorithm" | "sequential" | "random";
 
+export interface AllocationResult {
+  vehicle_plate_num: string;
+  status: "success" | "failure";
+  bay_assigned?: number;
+  slot_assigned?: number;
+  allocation_score?: number;
+  allocation_time?: string;
+  error_message?: string;
+}
+
+export interface SimulationResult {
+  strategy: AllocationStrategy;
+  total_vehicles: number;
+  successful_allocations: number;
+  failed_allocations: number;
+  success_rate: number;
+  average_allocation_score: number;
+  total_processing_time: number;
+  allocation_results: AllocationResult[];
+  final_parking_status: any; // Can be typed more strictly if needed
+  database_file: string;
+}
+
+export interface ComparisonResults {
+  algorithm: SimulationResult | null;
+  random: SimulationResult | null;
+  sequential: SimulationResult | null;
+}
+
 export interface VehicleEntry {
   licensePlate: string;
   vehicleType: VehicleType;
