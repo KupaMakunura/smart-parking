@@ -1,11 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { BarChart3, Car, Home, LayoutDashboard, Settings } from "lucide-react";
+import {
+  BarChart3,
+  Car,
+  Home,
+  LayoutDashboard,
+  Settings,
+  LineChart,
+} from "lucide-react";
 import ParkingVisualization from "./parking-visualization";
 import VehicleEntryForm from "./vehicle-entry-form";
 import ParkingStats from "./parking-stats";
 import { ParkingProvider } from "@/context/parking-context";
+import ParkingMetrics from "./parking-metrics";
 
 export default function ParkingSystem() {
   const [activeView, setActiveView] = useState("dashboard");
@@ -56,6 +64,18 @@ export default function ParkingSystem() {
               >
                 <BarChart3 className="h-4 w-4" />
                 <span>Parking Statistics</span>
+              </button>
+
+              <button
+                onClick={() => setActiveView("parking-metrics")}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md ${
+                  activeView === "algorithm"
+                    ? "bg-blue-50 text-blue-700 font-medium"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <LineChart className="h-4 w-4" />
+                <span>Parking Metrics</span>
               </button>
 
               {/* Algorithm Selection Section */}
@@ -237,6 +257,7 @@ if len(available_spaces) > 0:
                   </div>
                 </div>
               )}
+              {activeView === "parking-metrics" && <ParkingMetrics />}
 
               {activeView === "sequential" && (
                 <div className="bg-white rounded-lg shadow-lg p-6">

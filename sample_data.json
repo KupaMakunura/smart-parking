@@ -1,0 +1,322 @@
+[
+  {
+    "vehicle_plate_num": "GOV7319",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T08:00:00",
+    "departure_time": "2025-07-21T15:30:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "ABH8821",
+    "vehicle_plate_type": 1,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T08:15:00",
+    "departure_time": "2025-07-21T16:45:00",
+    "priority_level": 2
+  },
+  {
+    "vehicle_plate_num": "AXY4590",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 2,
+    "arrival_time": "2025-07-21T08:30:00",
+    "departure_time": "2025-07-21T14:00:00",
+    "priority_level": 1
+  },
+  {
+    "vehicle_plate_num": "GOV1047",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T08:45:00",
+    "departure_time": "2025-07-21T17:15:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "ACD3321",
+    "vehicle_plate_type": 1,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T09:00:00",
+    "departure_time": "2025-07-21T18:00:00",
+    "priority_level": 2
+  },
+  {
+    "vehicle_plate_num": "AFG5873",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 2,
+    "arrival_time": "2025-07-21T09:15:00",
+    "departure_time": "2025-07-21T15:00:00",
+    "priority_level": 1
+  },
+  {
+    "vehicle_plate_num": "GOV9823",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T09:30:00",
+    "departure_time": "2025-07-21T19:00:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "AHJ1234",
+    "vehicle_plate_type": 1,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T09:45:00",
+    "departure_time": "2025-07-21T17:30:00",
+    "priority_level": 2
+  },
+  {
+    "vehicle_plate_num": "AKL6789",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 2,
+    "arrival_time": "2025-07-21T10:00:00",
+    "departure_time": "2025-07-21T16:30:00",
+    "priority_level": 1
+  },
+  {
+    "vehicle_plate_num": "GOV5543",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T10:15:00",
+    "departure_time": "2025-07-21T20:00:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "AMN0987",
+    "vehicle_plate_type": 1,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T10:30:00",
+    "departure_time": "2025-07-21T18:45:00",
+    "priority_level": 2
+  },
+  {
+    "vehicle_plate_num": "AOP3456",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T10:45:00",
+    "departure_time": "2025-07-21T19:15:00",
+    "priority_level": 0
+  },
+  {
+    "vehicle_plate_num": "GOV2187",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 2,
+    "arrival_time": "2025-07-21T11:00:00",
+    "departure_time": "2025-07-21T18:15:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "AQR7890",
+    "vehicle_plate_type": 1,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T11:15:00",
+    "departure_time": "2025-07-21T20:30:00",
+    "priority_level": 2
+  },
+  {
+    "vehicle_plate_num": "AST1122",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T11:30:00",
+    "departure_time": "2025-07-21T17:00:00",
+    "priority_level": 0
+  },
+  {
+    "vehicle_plate_num": "GOV6655",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 2,
+    "arrival_time": "2025-07-21T11:45:00",
+    "departure_time": "2025-07-21T21:00:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "AUV3344",
+    "vehicle_plate_type": 1,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T12:00:00",
+    "departure_time": "2025-07-21T19:45:00",
+    "priority_level": 2
+  },
+  {
+    "vehicle_plate_num": "AWX5566",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T12:15:00",
+    "departure_time": "2025-07-21T22:00:00",
+    "priority_level": 1
+  },
+  {
+    "vehicle_plate_num": "GOV8877",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T12:30:00",
+    "departure_time": "2025-07-21T20:45:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "AYZ9900",
+    "vehicle_plate_type": 1,
+    "vehicle_type": 2,
+    "arrival_time": "2025-07-21T12:45:00",
+    "departure_time": "2025-07-21T21:30:00",
+    "priority_level": 2
+  },
+  {
+    "vehicle_plate_num": "ABA1212",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T13:00:00",
+    "departure_time": "2025-07-21T23:00:00",
+    "priority_level": 1
+  },
+  {
+    "vehicle_plate_num": "GOV3434",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T13:15:00",
+    "departure_time": "2025-07-22T00:15:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "ACE2323",
+    "vehicle_plate_type": 1,
+    "vehicle_type": 2,
+    "arrival_time": "2025-07-21T13:30:00",
+    "departure_time": "2025-07-21T22:15:00",
+    "priority_level": 2
+  },
+  {
+    "vehicle_plate_num": "ADF3434",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T13:45:00",
+    "departure_time": "2025-07-22T00:45:00",
+    "priority_level": 0
+  },
+  {
+    "vehicle_plate_num": "GOV4545",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T14:00:00",
+    "departure_time": "2025-07-21T23:45:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "AGH4545",
+    "vehicle_plate_type": 1,
+    "vehicle_type": 2,
+    "arrival_time": "2025-07-21T14:15:00",
+    "departure_time": "2025-07-22T01:15:00",
+    "priority_level": 2
+  },
+  {
+    "vehicle_plate_num": "AJK5656",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T14:30:00",
+    "departure_time": "2025-07-22T02:00:00",
+    "priority_level": 0
+  },
+  {
+    "vehicle_plate_num": "GOV5656",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T14:45:00",
+    "departure_time": "2025-07-22T00:30:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "ALM6767",
+    "vehicle_plate_type": 1,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T15:00:00",
+    "departure_time": "2025-07-22T03:00:00",
+    "priority_level": 2
+  },
+  {
+    "vehicle_plate_num": "ANP7878",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T15:15:00",
+    "departure_time": "2025-07-22T01:45:00",
+    "priority_level": 1
+  },
+  {
+    "vehicle_plate_num": "GOV7878",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 2,
+    "arrival_time": "2025-07-21T15:30:00",
+    "departure_time": "2025-07-22T02:30:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "AQR8989",
+    "vehicle_plate_type": 1,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T15:45:00",
+    "departure_time": "2025-07-22T04:00:00",
+    "priority_level": 2
+  },
+  {
+    "vehicle_plate_num": "ATS9090",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T16:00:00",
+    "departure_time": "2025-07-22T03:30:00",
+    "priority_level": 0
+  },
+  {
+    "vehicle_plate_num": "GOV9090",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T16:15:00",
+    "departure_time": "2025-07-22T01:00:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "AUV1313",
+    "vehicle_plate_type": 1,
+    "vehicle_type": 2,
+    "arrival_time": "2025-07-21T16:30:00",
+    "departure_time": "2025-07-22T05:00:00",
+    "priority_level": 2
+  },
+  {
+    "vehicle_plate_num": "AWX2424",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 0,
+    "arrival_time": "2025-07-21T16:45:00",
+    "departure_time": "2025-07-22T02:45:00",
+    "priority_level": 1
+  },
+  {
+    "vehicle_plate_num": "GOV2424",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T17:00:00",
+    "departure_time": "2025-07-22T06:00:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "AFL9192",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 1,
+    "arrival_time": "2025-07-21T17:15:00",
+    "departure_time": "2025-07-22T04:30:00",
+    "priority_level": 0
+  },
+  {
+    "vehicle_plate_num": "GOV3535",
+    "vehicle_plate_type": 2,
+    "vehicle_type": 2,
+    "arrival_time": "2025-07-21T17:30:00",
+    "departure_time": "2025-07-22T05:30:00",
+    "priority_level": 3
+  },
+  {
+    "vehicle_plate_num": "AZY3535",
+    "vehicle_plate_type": 0,
+    "vehicle_type": 2,
+    "arrival_time": "2025-07-21T17:45:00",
+    "departure_time": "2025-07-22T03:15:00",
+    "priority_level": 1
+  }
+]

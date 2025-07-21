@@ -35,9 +35,6 @@ export default function ParkingVisualization() {
   const [vehicleType, setVehicleType] = useState<
     "government" | "private" | "public"
   >("private");
-  const [processingImage, setProcessingImage] = useState<boolean>(false);
-  const entryInputRef = useRef<HTMLInputElement>(null);
-  const exitInputRef = useRef<HTMLInputElement>(null);
   const controlsRef = useRef(null);
   const {
     parkingData,
@@ -80,62 +77,6 @@ export default function ParkingVisualization() {
         resolve({ licensePlate: randomLicensePlate, vehicleType });
       }, 1500);
     });
-  };
-
-  const handleEntryImageUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setProcessingImage(true);
-
-      // Create a URL for the image
-      const imageUrl = URL.createObjectURL(file);
-      setEntryImage(imageUrl);
-
-      try {
-        // Simulate AI processing to extract license plate
-        const { licensePlate: extractedPlate, vehicleType: extractedType } =
-          await simulateLicensePlateExtraction(file);
-
-        setLicensePlate(extractedPlate);
-        setVehicleType(extractedType);
-        setShowEntryModal(true);
-      } catch (error) {
-        console.error("Error processing image:", error);
-        alert("Failed to process the image. Please try again.");
-      } finally {
-        setProcessingImage(false);
-      }
-    }
-  };
-
-  const handleExitImageUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setProcessingImage(true);
-
-      // Create a URL for the image
-      const imageUrl = URL.createObjectURL(file);
-      setExitImage(imageUrl);
-
-      try {
-        // Simulate AI processing to extract license plate
-        const { licensePlate: extractedPlate, vehicleType: extractedType } =
-          await simulateLicensePlateExtraction(file);
-
-        setLicensePlate(extractedPlate);
-        setVehicleType(extractedType);
-        setShowExitModal(true);
-      } catch (error) {
-        console.error("Error processing image:", error);
-        alert("Failed to process the image. Please try again.");
-      } finally {
-        setProcessingImage(false);
-      }
-    }
   };
 
   const confirmEntry = async () => {
@@ -271,49 +212,6 @@ export default function ParkingVisualization() {
             <span className="sr-only">Refresh</span>
           </Button>
         </div>
-        {/* <div className="space-y-2">
-          <Button
-            onClick={() => entryInputRef.current?.click()}
-            className="w-full bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
-            size="sm"
-            disabled={processingImage || isLoading}
-          >
-            {processingImage ? (
-              <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-            ) : (
-              <Upload className="h-4 w-4" />
-            )}
-            Upload Entry Image
-          </Button>
-          <input
-            type="file"
-            ref={entryInputRef}
-            className="hidden"
-            accept="image/*"
-            onChange={handleEntryImageUpload}
-          />
-
-          <Button
-            onClick={() => exitInputRef.current?.click()}
-            className="w-full bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
-            size="sm"
-            disabled={processingImage || isLoading}
-          >
-            {processingImage ? (
-              <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-            ) : (
-              <Upload className="h-4 w-4" />
-            )}
-            Upload Exit Image
-          </Button>
-          <input
-            type="file"
-            ref={exitInputRef}
-            className="hidden"
-            accept="image/*"
-            onChange={handleExitImageUpload}
-          />
-        </div> */}
       </div>
 
       <Canvas camera={{ position: [15, 15, 15], fov: 50 }}>
@@ -559,8 +457,6 @@ export default function ParkingVisualization() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-
     </div>
   );
 }

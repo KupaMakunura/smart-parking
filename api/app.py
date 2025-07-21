@@ -2,7 +2,7 @@ import json
 import os
 import pickle
 from datetime import datetime, timedelta, date
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 import time
 
 import numpy as np
@@ -257,7 +257,18 @@ async def allocate_parking(
             "priority_level": vehicle_data.priority_level,
             "is_active": True,
         }
-        allocation_id = db.create_allocation(allocation_record)
+        
+        # Save to the appropriate database based on strategy
+        if selected_strategy == "algorithm":
+            strategy_db = db_algorithm
+        elif selected_strategy == "sequential":
+            strategy_db = db_sequential
+        elif selected_strategy == "random":
+            strategy_db = db_random
+        else:
+            strategy_db = db
+            
+        allocation_id = strategy_db.create_allocation(allocation_record)
         allocation_record["id"] = allocation_id
         return ParkingAllocation(**allocation_record)
     else:
@@ -285,9 +296,162 @@ async def allocate_parking(
             "priority_level": vehicle_data.priority_level,
             "is_active": True,
         }
-        allocation_id = db.create_allocation(allocation_record)
+        
+        # Save to the appropriate database based on strategy
+        if selected_strategy == "algorithm":
+            strategy_db = db_algorithm
+        elif selected_strategy == "sequential":
+            strategy_db = db_sequential
+        elif selected_strategy == "random":
+            strategy_db = db_random
+        else:
+            strategy_db = db
+            
+        allocation_id = strategy_db.create_allocation(allocation_record)
         allocation_record["id"] = allocation_id
         return ParkingAllocation(**allocation_record)
+
+
+# Bulk allocate parking slots
+@app.post("/api/parking/allocate/bulk", response_model=List[Union[ParkingAllocation, None]])
+async def bulk_allocate_parking(
+    vehicles_data: List[VehicleData],
+    strategy: Optional[str] = Query(
+        None, description="Allocation strategy: algorithm, sequential, random"
+    ),
+):
+    if not smart_parking:
+        raise HTTPException(
+            status_code=500, detail="Smart parking system not initialized"
+        )
+
+    # Use strategy from query or default to 'algorithm'
+    selected_strategy = (strategy or "algorithm").lower()
+    if selected_strategy not in ["algorithm", "sequential", "random"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid strategy. Must be 'algorithm', 'sequential', or 'random'",
+        )
+
+    # Select the appropriate database based on strategy
+    if selected_strategy == "algorithm":
+        strategy_db = db_algorithm
+    elif selected_strategy == "sequential":
+        strategy_db = db_sequential
+    elif selected_strategy == "random":
+        strategy_db = db_random
+    else:
+        strategy_db = db
+
+    results = []
+    
+    if selected_strategy == "algorithm":
+        # Process each vehicle individually using the smart parking system
+        for vehicle_data in vehicles_data:
+            try:
+                # Prepare data for the model
+                vehicle_input = {
+                    "vehicle_plate_num": vehicle_data.vehicle_plate_num,
+                    "vehicle_plate_type": vehicle_data.vehicle_plate_type,
+                    "vehicle_type": vehicle_data.vehicle_type,
+                    "arrival_time": vehicle_data.arrival_time,
+                    "departure_time": vehicle_data.departure_time,
+                    "priority_level": vehicle_data.priority_level,
+                }
+                arrival_time = parse_datetime(vehicle_data.arrival_time)
+                departure_time = parse_datetime(vehicle_data.departure_time)
+                duration_hours = (departure_time - arrival_time).total_seconds() / 3600
+                vehicle_input["duration_hours"] = duration_hours
+                vehicle_input["day_of_week"] = arrival_time.weekday()
+                vehicle_input["hour_of_day"] = arrival_time.hour
+
+                # Allocate parking
+                allocation = smart_parking.allocate_parking(vehicle_input)
+                if allocation["status"] == "Allocated":
+                    allocation_record = {
+                        "vehicle_plate_num": vehicle_data.vehicle_plate_num,
+                        "vehicle_plate_type": vehicle_data.vehicle_plate_type,
+                        "vehicle_type": vehicle_data.vehicle_type,
+                        "bay_assigned": int(allocation["bay_assigned"]),
+                        "slot_assigned": int(allocation["slot_assigned"]),
+                        "allocation_score": float(allocation["allocation_score"]),
+                        "allocation_time": allocation["allocation_time"],
+                        "departure_time": vehicle_data.departure_time,
+                        "priority_level": vehicle_data.priority_level,
+                        "is_active": True,
+                    }
+                    # Save to strategy-specific database
+                    allocation_id = strategy_db.create_allocation(allocation_record)
+                    allocation_record["id"] = allocation_id
+                    results.append(ParkingAllocation(**allocation_record))
+                else:
+                    # If allocation fails, add None to results to maintain order
+                    results.append(None)
+            except Exception as e:
+                # Log the error and continue with next vehicle
+                print(f"Error processing vehicle {vehicle_data.vehicle_plate_num}: {str(e)}")
+                results.append(None)
+    else:
+        # Use simulation manager for sequential/random with all vehicles at once
+        try:
+            # Prepare all vehicles data
+            vehicles_list = []
+            for vehicle_data in vehicles_data:
+                vehicle_input = {
+                    "vehicle_plate_num": vehicle_data.vehicle_plate_num,
+                    "vehicle_plate_type": vehicle_data.vehicle_plate_type,
+                    "vehicle_type": vehicle_data.vehicle_type,
+                    "arrival_time": vehicle_data.arrival_time,
+                    "departure_time": vehicle_data.departure_time,
+                    "priority_level": vehicle_data.priority_level,
+                }
+                arrival_time = parse_datetime(vehicle_data.arrival_time)
+                departure_time = parse_datetime(vehicle_data.departure_time)
+                duration_hours = (departure_time - arrival_time).total_seconds() / 3600
+                vehicle_input["duration_hours"] = duration_hours
+                vehicle_input["day_of_week"] = arrival_time.weekday()
+                vehicle_input["hour_of_day"] = arrival_time.hour
+                vehicles_list.append(vehicle_input)
+
+            # Run simulation with all vehicles
+            simulation_manager = SimulationManager(smart_parking)
+            sim_results = simulation_manager.run_simulation(
+                vehicles_list, selected_strategy
+            )
+
+            # Process results
+            for i, alloc_result in enumerate(sim_results["allocation_results"]):
+                if i >= len(vehicles_data):
+                    break
+                    
+                if alloc_result["status"] == "success":
+                    vehicle_data = vehicles_data[i]
+                    allocation_record = {
+                        "vehicle_plate_num": vehicle_data.vehicle_plate_num,
+                        "vehicle_plate_type": vehicle_data.vehicle_plate_type,
+                        "vehicle_type": vehicle_data.vehicle_type,
+                        "bay_assigned": int(alloc_result["bay_assigned"]),
+                        "slot_assigned": int(alloc_result["slot_assigned"]),
+                        "allocation_score": float(alloc_result["allocation_score"]),
+                        "allocation_time": alloc_result["allocation_time"],
+                        "departure_time": vehicle_data.departure_time,
+                        "priority_level": vehicle_data.priority_level,
+                        "is_active": True,
+                    }
+                    # Save to strategy-specific database
+                    allocation_id = strategy_db.create_allocation(allocation_record)
+                    allocation_record["id"] = allocation_id
+                    results.append(ParkingAllocation(**allocation_record))
+                else:
+                    results.append(None)
+        except Exception as e:
+            # If there's an error in the simulation, return what we have so far
+            print(f"Error in bulk allocation: {str(e)}")
+            # Fill remaining results with None if needed
+            while len(results) < len(vehicles_data):
+                results.append(None)
+
+    return results
 
 
 # Get allocation by ID
