@@ -7,6 +7,7 @@ import time
 
 import numpy as np
 from fastapi import FastAPI, HTTPException, Query, Body
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # Custom modules
@@ -679,7 +680,7 @@ async def get_parking_metrics_by_strategy(strategy: str):
             "allocations": strategy_db.get_all_allocations(),
         }
 
-        return response
+        return JSONResponse(content=response)
 
 
 # Compare all allocation strategies
