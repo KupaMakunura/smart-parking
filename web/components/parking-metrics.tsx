@@ -39,6 +39,14 @@ export default function ParkingMetrics() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [timeRange, setTimeRange] = useState<"1h" | "6h" | "24h">("1h");
   const [activeTab, setActiveTab] = useState<string>("occupancy");
+  type Strategy = (typeof strategies)[number];
+
+  const [selectedStrategies, setSelectedStrategies] = useState<Strategy[]>([
+    "algorithm",
+  ]);
+  const [efficiencyData, setEfficiencyData] = useState<{
+    [key: string]: any[];
+  }>({});
 
   const strategies = ["algorithm", "sequential", "random"] as const;
 
@@ -46,6 +54,7 @@ export default function ParkingMetrics() {
     setIsLoading(true);
     try {
       const newData: ParkingMetricsData = {};
+      const efficiencyMetrics: { [key: string]: any[] } = {};
 
       // Fetch data for each strategy
       for (const strategy of strategies) {
@@ -79,10 +88,33 @@ export default function ParkingMetrics() {
         ];
       }
 
-      setMetricsData((prev) => ({
-        ...prev,
-        ...newData,
-      }));
+      // Fetch efficiency data for each strategy
+      for (const strategy of strategies) {
+        const efficiencyResponse = await fetch(
+          `/api/parking/metrics/${strategy}`
+        );
+        const efficiencyData = await efficiencyResponse.json();
+
+        // Process allocations to calculate efficiency metrics
+        const processedData = efficiencyData.allocations.map(
+          (allocation: any) => ({
+            vehicle_plate_num: allocation.vehicle_plate_num,
+            bay_assigned: allocation.bay_assigned,
+            slot_assigned: allocation.slot_assigned,
+            allocation_time: new Date(allocation.allocation_time),
+            departure_time: new Date(allocation.departure_time),
+            allocation_score: allocation.allocation_score,
+            waiting_time:
+              new Date(allocation.departure_time).getTime() -
+              new Date(allocation.allocation_time).getTime(),
+          })
+        );
+
+        efficiencyMetrics[strategy] = processedData;
+      }
+
+      setMetricsData(newData);
+      setEfficiencyData(efficiencyMetrics);
     } catch (error) {
       console.error("Error fetching metrics data:", error);
     } finally {
@@ -125,7 +157,6 @@ export default function ParkingMetrics() {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Chart configuration
   const chartConfig = {
     algorithm: { label: "Algorithm", color: "#3b82f6" },
     sequential: { label: "Sequential", color: "#10b981" },
@@ -137,6 +168,30 @@ export default function ParkingMetrics() {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Parking Metrics</CardTitle>
         <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
+            {strategies.map((strategy) => (
+              <label
+                key={strategy}
+                className="flex items-center space-x-1 text-xs"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedStrategies.includes(strategy)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedStrategies([...selectedStrategies, strategy]);
+                    } else {
+                      setSelectedStrategies(
+                        selectedStrategies.filter((s) => s !== strategy)
+                      );
+                    }
+                  }}
+                  className="form-checkbox h-3 w-3"
+                />
+                <span className="capitalize">{strategy}</span>
+              </label>
+            ))}
+          </div>
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value as any)}
@@ -161,106 +216,26 @@ export default function ParkingMetrics() {
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="occupancy">Occupancy</TabsTrigger>
-            <TabsTrigger value="available">Available</TabsTrigger>
-            <TabsTrigger value="rate">Occupancy Rate</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-1">
+            <TabsTrigger value="efficiency">Allocation Efficiency</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="occupancy" className="mt-4">
-            <div className="h-screen">
-              <ChartContainer config={chartConfig}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="timestamp"
-                      tickFormatter={formatXAxis}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis
-                      label={{
-                        value: "Spots",
-                        angle: -90,
-                        position: "insideLeft",
-                      }}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <ChartTooltip
-                      content={({ active, payload, label }) => {
-                        if (!active || !payload?.length) return null;
-                        return (
-                          <ChartTooltipContent>
-                            <p className="text-sm font-medium">
-                              {new Date(label).toLocaleTimeString()}
-                            </p>
-                            {payload.map((entry) => (
-                              <p key={entry.name} className="text-sm">
-                                <span
-                                  className="inline-block w-3 h-3 mr-1 rounded-full"
-                                  style={{ backgroundColor: entry.color }}
-                                />
-                                {entry.name}: {entry.value?.toLocaleString()}
-                              </p>
-                            ))}
-                          </ChartTooltipContent>
-                        );
-                      }}
-                    />
-                    <ChartLegend
-                      content={({ payload }) => (
-                        <ChartLegendContent>
-                          {payload?.map((entry, index) => (
-                            <div
-                              key={`legend-${index}`}
-                              className="flex items-center text-sm"
-                              style={{ color: entry.color }}
-                            >
-                              <div
-                                className="w-3 h-3 mr-2 rounded-full"
-                                style={{ backgroundColor: entry.color }}
-                              />
-                              {entry.value}
-                            </div>
-                          ))}
-                        </ChartLegendContent>
-                      )}
-                    />
-                    {strategies.map((strategy) => (
-                      <Line
-                        key={strategy}
-                        type="monotone"
-                        dataKey="occupied"
-                        data={filterDataByTimeRange(
-                          metricsData[strategy] || []
-                        )}
-                        name={chartConfig[strategy].label}
-                        stroke={chartConfig[strategy].color}
-                        strokeWidth={2}
-                        dot={false}
-                        activeDot={{ r: 4 }}
-                      />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="available" className="mt-4">
+          <TabsContent value="efficiency" className="mt-4">
             <div className="h-80">
               <ChartContainer config={chartConfig}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
-                      dataKey="timestamp"
-                      tickFormatter={formatXAxis}
+                      dataKey="allocation_time"
+                      tickFormatter={(time) =>
+                        new Date(time).toLocaleTimeString()
+                      }
                       tick={{ fontSize: 12 }}
                     />
                     <YAxis
                       label={{
-                        value: "Spots",
+                        value: "Time (minutes)",
                         angle: -90,
                         position: "insideLeft",
                       }}
@@ -280,84 +255,24 @@ export default function ParkingMetrics() {
                                   className="inline-block w-3 h-3 mr-1 rounded-full"
                                   style={{ backgroundColor: entry.color }}
                                 />
-                                {entry.name}: {entry.value?.toLocaleString()}
+                                {entry.name}:{" "}
+                                {((entry.value as any) / (1000 * 60)).toFixed(
+                                  2
+                                )}{" "}
+                                min
                               </p>
                             ))}
                           </ChartTooltipContent>
                         );
                       }}
                     />
-                    {strategies.map((strategy) => (
+                    {selectedStrategies.map((strategy: Strategy) => (
                       <Line
                         key={strategy}
                         type="monotone"
-                        dataKey="available"
-                        data={filterDataByTimeRange(
-                          metricsData[strategy] || []
-                        )}
-                        name={chartConfig[strategy].label}
-                        stroke={chartConfig[strategy].color}
-                        strokeWidth={2}
-                        dot={false}
-                        activeDot={{ r: 4 }}
-                      />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="rate" className="mt-4">
-            <div className="h-80">
-              <ChartContainer config={chartConfig}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="timestamp"
-                      tickFormatter={formatXAxis}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis
-                      label={{
-                        value: "Rate (%)",
-                        angle: -90,
-                        position: "insideLeft",
-                      }}
-                      tick={{ fontSize: 12 }}
-                      domain={[0, 100]}
-                    />
-                    <ChartTooltip
-                      content={({ active, payload, label }) => {
-                        if (!active || !payload?.length) return null;
-                        return (
-                          <ChartTooltipContent>
-                            <p className="text-sm font-medium">
-                              {new Date(label).toLocaleTimeString()}
-                            </p>
-                            {payload.map((entry) => (
-                              <p key={entry.name} className="text-sm">
-                                <span
-                                  className="inline-block w-3 h-3 mr-1 rounded-full"
-                                  style={{ backgroundColor: entry.color }}
-                                />
-                                {entry.name}
-                              </p>
-                            ))}
-                          </ChartTooltipContent>
-                        );
-                      }}
-                    />
-                    {strategies.map((strategy) => (
-                      <Line
-                        key={strategy}
-                        type="monotone"
-                        dataKey="occupancyRate"
-                        data={filterDataByTimeRange(
-                          metricsData[strategy] || []
-                        )}
-                        name={chartConfig[strategy].label}
+                        dataKey="waiting_time"
+                        data={efficiencyData[strategy] || []}
+                        name={`${chartConfig[strategy].label} Waiting Time`}
                         stroke={chartConfig[strategy].color}
                         strokeWidth={2}
                         dot={false}

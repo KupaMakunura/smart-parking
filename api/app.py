@@ -257,7 +257,7 @@ async def allocate_parking(
             "priority_level": vehicle_data.priority_level,
             "is_active": True,
         }
-        
+
         # Save to the appropriate database based on strategy
         if selected_strategy == "algorithm":
             strategy_db = db_algorithm
@@ -267,7 +267,7 @@ async def allocate_parking(
             strategy_db = db_random
         else:
             strategy_db = db
-            
+
         allocation_id = strategy_db.create_allocation(allocation_record)
         allocation_record["id"] = allocation_id
         return ParkingAllocation(**allocation_record)
@@ -296,7 +296,7 @@ async def allocate_parking(
             "priority_level": vehicle_data.priority_level,
             "is_active": True,
         }
-        
+
         # Save to the appropriate database based on strategy
         if selected_strategy == "algorithm":
             strategy_db = db_algorithm
@@ -306,14 +306,16 @@ async def allocate_parking(
             strategy_db = db_random
         else:
             strategy_db = db
-            
+
         allocation_id = strategy_db.create_allocation(allocation_record)
         allocation_record["id"] = allocation_id
         return ParkingAllocation(**allocation_record)
 
 
 # Bulk allocate parking slots
-@app.post("/api/parking/allocate/bulk", response_model=List[Union[ParkingAllocation, None]])
+@app.post(
+    "/api/parking/allocate/bulk", response_model=List[Union[ParkingAllocation, None]]
+)
 async def bulk_allocate_parking(
     vehicles_data: List[VehicleData],
     strategy: Optional[str] = Query(
@@ -344,7 +346,7 @@ async def bulk_allocate_parking(
         strategy_db = db
 
     results = []
-    
+
     if selected_strategy == "algorithm":
         # Process each vehicle individually using the smart parking system
         for vehicle_data in vehicles_data:
@@ -389,7 +391,9 @@ async def bulk_allocate_parking(
                     results.append(None)
             except Exception as e:
                 # Log the error and continue with next vehicle
-                print(f"Error processing vehicle {vehicle_data.vehicle_plate_num}: {str(e)}")
+                print(
+                    f"Error processing vehicle {vehicle_data.vehicle_plate_num}: {str(e)}"
+                )
                 results.append(None)
     else:
         # Use simulation manager for sequential/random with all vehicles at once
@@ -423,7 +427,7 @@ async def bulk_allocate_parking(
             for i, alloc_result in enumerate(sim_results["allocation_results"]):
                 if i >= len(vehicles_data):
                     break
-                    
+
                 if alloc_result["status"] == "success":
                     vehicle_data = vehicles_data[i]
                     allocation_record = {
@@ -647,6 +651,35 @@ async def get_parking_status_by_strategy(strategy: str):
         return await generate_parking_status_from_db(strategy_db)
     else:
         return await get_parking_status()
+
+
+@app.get("/api/parking/metrics/{strategy}", response_model=ParkingStatus)
+async def get_parking_metrics_by_strategy(strategy: str):
+    strategy = strategy.lower()
+
+    if strategy not in ["sequential", "random", "algorithm", "main"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid strategy. Must be 'sequential', 'random', 'algorithm', or 'main'",
+        )
+
+    # Get the appropriate database
+    if strategy == "main":
+        strategy_db = db
+    else:
+        strategy_db_map = {
+            "sequential": db_sequential,
+            "random": db_random,
+            "algorithm": db_algorithm,
+        }
+        strategy_db = strategy_db_map[strategy]
+
+        response = {
+            "strategy": strategy,
+            "allocations": strategy_db.get_all_allocations(),
+        }
+
+        return response
 
 
 # Compare all allocation strategies
